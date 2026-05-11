@@ -1,15 +1,22 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { fetchGoogleDocContent } from "./googleDocsReader.js";
+import { pickFileInteractively, fetchGoogleDocContent } from "./googleDocsReader.js";
 import { updateGoogleDoc } from "./googleDocsWriter.js";
 import { analyzeRisks } from "./llm.js";
 import { formatRiskMatrix } from "./formatter.js";
 
+const FOLDER_ID = process.env.DRIVE_FOLDER_ID;
+
 async function run() {
   try {
-    console.log("📥 Reading Google Doc...");
-    const text = await fetchGoogleDocContent(process.env.SOURCE_DOC_ID);
+    if (!FOLDER_ID) throw new Error("DRIVE_FOLDER_ID is not set in .env");
+
+    // Pick file interactively from folder listing
+    const file = await pickFileInteractively(FOLDER_ID);
+
+    console.log("📖 Reading document content...");
+    const text = await fetchGoogleDocContent(file.id);
 
     console.log("🤖 Analyzing risks...");
     const result = await analyzeRisks(text);
@@ -20,8 +27,8 @@ async function run() {
     const table = formatRiskMatrix(result);
     console.log(table);
 
-    console.log("📤 Writing to Google Sheets...");
-    await updateGoogleDoc(process.env.RESULT_SPREADSHEET_ID, result);
+    console.log("📤 Creating Risk Matrix spreadsheet in Drive folder...");
+    await updateGoogleDoc(FOLDER_ID, file.name, result);
 
     console.log("✅ DONE");
   } catch (err) {

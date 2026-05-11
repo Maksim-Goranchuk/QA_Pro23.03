@@ -1,16 +1,5 @@
 import { google } from "googleapis";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const auth = new google.auth.GoogleAuth({
-  keyFile: "./service-account.json",
-  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-});
-
-const sheets = google.sheets({ version: "v4", auth });
-
-const SPREADSHEET_ID = "1J_AR7AieziOxChS5hKbYHTsHLew5WtT_9lFcbKHt4zs";
+import { getOAuthClient } from "./auth.js";
 
 const HEADERS = [
   "Component",
@@ -22,16 +11,52 @@ const HEADERS = [
   "Test Cases",
 ];
 
-async function getFirstSheet(spreadsheetId) {
-  const res = await sheets.spreadsheets.get({ spreadsheetId });
-  const sheet = res.data.sheets?.[0];
-  return {
-    sheetId: sheet?.properties?.sheetId ?? 0,
-    sheetName: sheet?.properties?.title ?? "Sheet1",
-  };
+async function createSpreadsheetInFolder(folderID, fileName) {
+  const auth = await getOAuthClient();
+  const drive = google.drive({ version: "v3", auth });
+
+  const res = await drive.files.create({
+    requestBody: {
+      name: `Risk Matrix — ${fileName}`,
+      mimeType: "application/vnd.google-apps.spreadsheet",
+      parents: [folderID],
+    },
+    fields: "id, name, webViewLink",
+  });
+
+  console.log(`📊 Created: "${res.data.name}"`);
+  console.log(`🔗 ${res.data.webViewLink}`);
+
+  return res.data.id;
 }
 
-export async function updateGoogleDoc(spreadsheetId, data) {
+function generatePriorityColorRules(sheetId, risks) {
+  const colorMap = {
+    High:   { red: 1,    green: 0.8,  blue: 0.8  },
+    Medium: { red: 1,    green: 0.93, blue: 0.8  },
+    Low:    { red: 0.85, green: 0.95, blue: 0.85 },
+  };
+
+  return risks.map((r, i) => ({
+    repeatCell: {
+      range: {
+        sheetId,
+        startRowIndex: i + 1,
+        endRowIndex: i + 2,
+        startColumnIndex: 0,
+        endColumnIndex: HEADERS.length,
+      },
+      cell: {
+        userEnteredFormat: {
+          backgroundColor: colorMap[r.priority] ?? { red: 1, green: 1, blue: 1 },
+        },
+      },
+      fields: "userEnteredFormat(backgroundColor)",
+    },
+  }));
+}
+
+export async function updateGoogleDoc(folderID, sourceFileName, data) {
   const risks = data?.risks || [];
 
   if (!Array.isArray(risks)) {
@@ -39,10 +64,18 @@ export async function updateGoogleDoc(spreadsheetId, data) {
     return;
   }
 
-  const { sheetId, sheetName } = await getFirstSheet(SPREADSHEET_ID);
-  console.log(`📋 Using sheet: "${sheetName}" (id: ${sheetId})`);
+  const spreadsheetId = await createSpreadsheetInFolder(folderID, sourceFileName);
 
-  // Build rows: header + data
+  const auth = await getOAuthClient();
+  const sheets = google.sheets({ version: "v4", auth });
+
+  const spreadsheetInfo = await sheets.spreadsheets.get({ spreadsheetId });
+  const sheet = spreadsheetInfo.data.sheets?.[0];
+  const sheetId = sheet?.properties?.sheetId ?? 0;
+  const sheetName = sheet?.properties?.title ?? "Sheet1";
+
+  console.log(`📋 Sheet: "${sheetName}" (id: ${sheetId})`);
+
   const rows = [
     HEADERS,
     ...risks.map((r) => [
@@ -56,26 +89,17 @@ export async function updateGoogleDoc(spreadsheetId, data) {
     ]),
   ];
 
-  // Clear existing content
-  await sheets.spreadsheets.values.clear({
-    spreadsheetId: SPREADSHEET_ID,
-    range: sheetName,
-  });
-
-  // Write all rows at once
   await sheets.spreadsheets.values.update({
-    spreadsheetId: SPREADSHEET_ID,
+    spreadsheetId,
     range: `${sheetName}!A1`,
     valueInputOption: "RAW",
     requestBody: { values: rows },
   });
 
-  // Apply formatting
   await sheets.spreadsheets.batchUpdate({
-    spreadsheetId: SPREADSHEET_ID,
+    spreadsheetId,
     requestBody: {
       requests: [
-        // Bold header + dark background + white text
         {
           repeatCell: {
             range: {
@@ -97,7 +121,7 @@ export async function updateGoogleDoc(spreadsheetId, data) {
             fields: "userEnteredFormat(textFormat,backgroundColor)",
           },
         },
-        // Auto-resize all columns
+        ...generatePriorityColorRules(sheetId, risks),
         {
           autoResizeDimensions: {
             dimensions: {
@@ -108,7 +132,6 @@ export async function updateGoogleDoc(spreadsheetId, data) {
             },
           },
         },
-        // Freeze header row
         {
           updateSheetProperties: {
             properties: {
@@ -122,5 +145,5 @@ export async function updateGoogleDoc(spreadsheetId, data) {
     },
   });
 
-  console.log(`✅ Spreadsheet updated: ${risks.length} risks written`);
+  console.log(`✅ Done: ${risks.length} risks written`);
 }
