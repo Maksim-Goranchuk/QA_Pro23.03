@@ -6,6 +6,7 @@
     "start": "node outline-to-gdocs.js"
   },
   "dependencies": {
+    "dotenv": "^16.6.1",
     "googleapis": "^121.0.0"
   },
   "engines": {

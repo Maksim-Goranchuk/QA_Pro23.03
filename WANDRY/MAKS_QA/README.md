@@ -7,7 +7,8 @@
 - `package.json` — зависимости и скрипты
 - `credentials.json` — Google OAuth / service account credentials (не храните в git)
 - `token.json` — OAuth токен после первой авторизации
-- `.gitignore` — исключает `node_modules`, `credentials.json` и `token.json`
+- `.env` — переменные окружения (не храните в git)
+- `.gitignore` — исключает `node_modules`, `credentials.json`, `token.json` и `.env`
 
 ## Установка
 
@@ -24,24 +25,18 @@ npm install
    - Google Docs API
 3. Создайте OAuth client или service account и скачайте `credentials.json`
 4. Сохраните `credentials.json` в папке `WANDRY/MAKS_QA`
+5. Создайте файл `.env` на основе `.env.example` и заполните переменные
 
 ## Переменные окружения
 
-Установите значения перед запуском:
+Создайте файл `.env` в корне проекта со следующими переменными:
 
 - `OUTLINE_TOKEN` — ваш Outline API токен
+- `OUTLINE_API_URL` — URL Outline API (по умолчанию https://outline.wandry.com.ua/api/)
 - `DRIVE_FOLDER_ID` — ID Google Drive папки, куда сохранять документы
 - `OUTLINE_IDS` — через запятую список ID документов Outline
-- либо `OUTLINE_PARENT_ID` — ID родительского Outline документа
-
-### Пример PowerShell
-
-```powershell
-$env:OUTLINE_TOKEN = 'ol_api_xxx'
-$env:DRIVE_FOLDER_ID = '1abc...'
-$env:OUTLINE_IDS = 'Q3mwqFKlvX,LXZC08T1DC'
-node outline-to-gdocs.js
-```
+- `OUTLINE_PARENT_ID` — ID родительского Outline документа (альтернатива OUTLINE_IDS)
+- `DRIVE_SUPPORTS_ALL_DRIVES` — true/false для поддержки shared drives
 
 ## Запуск
 

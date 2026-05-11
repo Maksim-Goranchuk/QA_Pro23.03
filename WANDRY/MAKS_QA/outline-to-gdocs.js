@@ -2,18 +2,19 @@ import fs from 'fs/promises';
 import path from 'path';
 import readline from 'readline';
 import {google} from 'googleapis';
+import 'dotenv/config';
 
 const ROOT = process.cwd();
 const CREDENTIALS_PATH = path.join(ROOT, 'credentials.json');
 const TOKEN_PATH = path.join(ROOT, 'token.json');
 
-const OUTLINE_TOKEN = process.env.OUTLINE_TOKEN || 'ol_api_KkZN5akcMlbJS3tAGMg0t9EhO5Ck2nHI3kkkmr';
-const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID || '1_8SBbYKSsAK4eE2h4mtmgys9M27m_3jz';
-const OUTLINE_PARENT_ID = process.env.OUTLINE_PARENT_ID || '';
+const OUTLINE_TOKEN = process.env.OUTLINE_TOKEN;
+const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID;
+const OUTLINE_PARENT_ID = process.env.OUTLINE_PARENT_ID;
 const OUTLINE_IDS = (process.env.OUTLINE_IDS || '').split(',').map(v => v.trim()).filter(Boolean);
 const DRIVE_SUPPORTS_ALL_DRIVES = process.env.DRIVE_SUPPORTS_ALL_DRIVES !== 'false';
 
-const API_URL = process.env.OUTLINE_API_URL || 'https://outline.wandry.com.ua/api/';
+const API_URL = process.env.OUTLINE_API_URL;
 const SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/documents'];
 const DEFAULT_OUTLINE_IDS = ['Q3mwqFKlvX', 'LXZC08T1DC', 'lAvK728mKN', 'iStqy4AfCT', 'Rv7oKt5PlC', 'keQo8BfPNq', 'jORP2gMSgk', 'WUrR4O4Xm4'];
 
@@ -186,6 +187,9 @@ async function main() {
   }
   if (!DRIVE_FOLDER_ID) {
     throw new Error('Missing DRIVE_FOLDER_ID. Set it as an environment variable.');
+  }
+  if (!API_URL) {
+    throw new Error('Missing OUTLINE_API_URL. Set it as an environment variable.');
   }
 
   const ids = OUTLINE_PARENT_ID ? (await fetchOutlineList(OUTLINE_PARENT_ID)).map(item => item.id) : (OUTLINE_IDS.length ? OUTLINE_IDS : DEFAULT_OUTLINE_IDS);
