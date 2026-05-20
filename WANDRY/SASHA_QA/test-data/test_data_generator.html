@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Генератор тестовых данных</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f0; color: #1a1a18; min-height: 100vh; padding: 2rem 1rem; }
+.container { max-width: 780px; margin: 0 auto; }
+h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+.subtitle { font-size: 14px; color: #6b6b68; margin-bottom: 2rem; }
+.card { background: #fff; border-radius: 12px; border: 1px solid #e2e1db; padding: 1.5rem; margin-bottom: 1rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+@media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+.field { display: flex; flex-direction: column; gap: 6px; }
+label { font-size: 13px; font-weight: 500; color: #6b6b68; }
+select, input[type="number"] { width: 100%; padding: 8px 12px; border: 1px solid #d8d7d1; border-radius: 8px; font-size: 14px; font-family: inherit; color: #1a1a18; background: #fff; outline: none; }
+select:focus, input:focus { border-color: #888; }
+select[multiple] { min-height: 120px; padding: 4px; }
+select[multiple] option { padding: 5px 8px; border-radius: 4px; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1.25rem; align-items: center; }
+.btn-primary { background: #1a1a18; color: #fff; border: none; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-family: inherit; cursor: pointer; }
+.btn-primary:hover { opacity: 0.82; }
+.btn-secondary { background: #fff; color: #1a1a18; border: 1px solid #d8d7d1; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-family: inherit; cursor: pointer; }
+.btn-secondary:hover { background: #f5f4f0; }
+.seed-info { font-size: 12px; color: #9a9994; }
+.results-card { background: #fff; border-radius: 12px; border: 1px solid #e2e1db; padding: 1.5rem; }
+.empty-state { text-align: center; padding: 2rem; color: #9a9994; font-size: 14px; }
+.results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.results-title { font-size: 14px; font-weight: 500; }
+.results-count { font-size: 13px; color: #9a9994; }
+.category-block { margin-bottom: 1.5rem; }
+.category-block:last-child { margin-bottom: 0; }
+.cat-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #9a9994; margin-bottom: 8px; }
+.items-list { display: flex; flex-direction: column; gap: 5px; }
+.item-row { background: #f8f7f4; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; }
+.item-val { font-family: 'SF Mono','Consolas','Monaco',monospace; font-size: 13px; color: #1a1a18; word-break: break-all; flex: 1; }
+.item-empty { color: #9a9994; font-style: italic; }
+.rand-badge { font-size: 10px; background: #f0eaff; color: #5b3fb5; border-radius: 4px; padding: 1px 5px; flex-shrink: 0; }
+.tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; font-weight: 500; }
+.tag-neg   { background: #FCEBEB; color: #A32D2D; }
+.tag-bound { background: #FAEEDA; color: #854F0B; }
+.tag-spec  { background: #EEEDFE; color: #3C3489; }
+.tag-sec   { background: #EAF3DE; color: #3B6D11; }
+.tag-pos   { background: #E6F1FB; color: #185FA5; }
+.copy-btn { background: none; border: 1px solid #d8d7d1; border-radius: 6px; padding: 3px 10px; font-size: 12px; font-family: inherit; cursor: pointer; color: #6b6b68; flex-shrink: 0; }
+.copy-btn:hover { background: #fff; border-color: #aaa; }
+.copy-btn.copied { color: #3B6D11; border-color: #639922; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Генератор тестовых данных</h1>
+  <p class="subtitle">Каждая генерация уникальна — рандомизация защищает от эффекта пестицида</p>
+
+  <div class="card">
+    <div class="form-grid">
+      <div class="field">
+        <label for="fieldType">Тип поля</label>
+        <select id="fieldType">
+          <option value="text">Текстовое поле (имя, комментарий)</option>
+          <option value="email">Email</option>
+          <option value="password">Пароль</option>
+          <option value="number">Числовое поле</option>
+          <option value="date">Дата</option>
+          <option value="phone">Телефон</option>
+          <option value="url">URL</option>
+          <option value="username">Логин / Username</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="locale">Язык / локаль данных</label>
+        <select id="locale">
+          <option value="mixed">Смешанный (рекомендован)</option>
+          <option value="en">Только латиница</option>
+          <option value="ru">Только кириллица</option>
+          <option value="unicode">Unicode-экзотика</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="minLen">Минимальная длина поля</label>
+        <input type="number" id="minLen" value="1" min="0" max="9999">
+      </div>
+      <div class="field">
+        <label for="maxLen">Максимальная длина поля</label>
+        <input type="number" id="maxLen" value="255" min="1" max="9999">
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="categories">Категории (можно выбрать несколько)</label>
+        <select id="categories" multiple>
+          <option value="positive" selected>Позитивные значения</option>
+          <option value="boundary" selected>Граничные значения</option>
+          <option value="negative" selected>Негативные / некорректные</option>
+          <option value="special" selected>Спецсимволы и кодировки</option>
+          <option value="security" selected>Безопасность (XSS, SQLi)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="randLevel">Степень рандомизации</label>
+        <select id="randLevel">
+          <option value="low">Низкая — только перемешивание</option>
+          <option value="med" selected>Средняя — часть данных случайна</option>
+          <option value="high">Высокая — максимум уникальности</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" id="generateBtn">⚡ Сгенерировать</button>
+      <button class="btn-secondary" id="exportBtn" style="display:none">↓ Экспорт CSV</button>
+      <span class="seed-info" id="seedInfo"></span>
+    </div>
+  </div>
+
+  <div class="results-card">
+    <div id="emptyState" class="empty-state">Настройте параметры и нажмите «Сгенерировать»</div>
+    <div id="resultsHeader" class="results-header" style="display:none">
+      <span class="results-title">Результаты</span>
+      <span class="results-count" id="resultsCount"></span>
+    </div>
+    <div id="results"></div>
+  </div>
+</div>
+
+<script>
+// ─── rng ───────────────────────────────────────────────────────────────────────
+// Simple seeded PRNG (mulberry32) so results are reproducible per seed
+var _seed = Date.now();
+function seedRng(s) { _seed = s >>> 0; }
+function rng() {
+  _seed += 0x6D2B79F5;
+  var t = _seed;
+  t = Math.imul(t ^ t >>> 15, t | 1);
+  t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+  return ((t ^ t >>> 14) >>> 0) / 4294967296;
+}
+function randInt(a, b) { return a + Math.floor(rng() * (b - a + 1)); }
+function pick(arr, n) {
+  var a = arr.slice(), r = [];
+  for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i+1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; }
+  return a.slice(0, Math.min(n, a.length));
+}
+function pickOne(arr) { return arr[Math.floor(rng() * arr.length)]; }
+function repeat(s, n) { var o = ''; for (var i = 0; i < n; i++) o += s; return o; }
+
+// ─── random string generators ──────────────────────────────────────────────────
+var ALPHA_EN  = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var ALPHA_RU  = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+var DIGITS    = '0123456789';
+var SPECIAL   = '!@#$%^&*()_+-=[]{}|;:\'",.<>?/`~\\';
+var UNICODE_CHARS = ['é','ñ','ü','ö','ä','ß','ø','å','æ','ç','ї','є','ő','ű','ž','š','č'];
+var EMOJI_POOL    = ['😀','🎉','🔥','💡','🚀','❤️','✓','★','©','®','™','€','£','¥','§','¶'];
+
+function randFrom(chars, n) {
+  var o = '';
+  for (var i = 0; i < n; i++) o += chars[Math.floor(rng() * chars.length)];
+  return o;
+}
+
+function randString(n, locale) {
+  switch (locale) {
+    case 'ru':      return randFrom(ALPHA_RU + DIGITS + ' ', n);
+    case 'en':      return randFrom(ALPHA_EN + DIGITS + ' ', n);
+    case 'unicode': return randFrom(ALPHA_EN + UNICODE_CHARS.join('') + EMOJI_POOL.join(''), n);
+    default: // mixed
+      var pool = (rng() < 0.5 ? ALPHA_EN : ALPHA_RU) + DIGITS;
+      return randFrom(pool, n);
+  }
+}
+
+function randWord(locale) {
+  var n = randInt(3, 10);
+  return randString(n, locale);
+}
+
+function randEmail() {
+  var users = ['user','test','admin','info','hello','ivan','maria','john','anna','support','dev','qa'];
+  var domains = ['example.com','test.org','mail.ru','gmail.com','company.io','service.net'];
+  var tlds = ['com','org','net','io','ru','de','fr','co.uk'];
+  var u = pickOne(users) + (rng() < 0.5 ? String(randInt(1,999)) : '');
+  var d = pickOne(['example','test','mysite','company','mail']) + '.' + pickOne(tlds);
+  return u + '@' + d;
+}
+
+function randDate() {
+  var y = randInt(1970, 2030);
+  var m = randInt(1, 12);
+  var daysInMonth = [31, (y%4===0?29:28), 31,30,31,30,31,31,30,31,30,31];
+  var d = randInt(1, daysInMonth[m-1]);
+  return y + '-' + (m<10?'0'+m:m) + '-' + (d<10?'0'+d:d);
+}
+
+function randPhone() {
+  var patterns = [
+    '+7' + randFrom(DIGITS, 10),
+    '8' + randFrom(DIGITS, 10),
+    '+1' + randFrom(DIGITS, 10),
+    '+44' + randFrom(DIGITS, 10),
+    '+49' + randFrom(DIGITS, 10)
+  ];
+  return pickOne(patterns);
+}
+
+function randUrl() {
+  var schemes = ['https://', 'http://'];
+  var hosts = ['example','test','myapp','service','api','shop','portal'];
+  var tlds = ['.com','.org','.io','.net','.ru'];
+  var paths = ['','/home','/about','/api/v1','/user/profile','/search?q=' + randFrom(ALPHA_EN,5)];
+  return pickOne(schemes) + pickOne(hosts) + pickOne(tlds) + pickOne(paths);
+}
+
+function randUsername() {
+  var prefixes = ['user','dev','test','ivan','john','anna','admin','guest'];
+  var suffixes = ['_pro','_42','123','_dev','_qa','2024',''];
+  return pickOne(prefixes) + pickOne(suffixes);
+}
+
+// ─── static pools ─────────────────────────────────────────────────────────────
+var POOLS = {
+  text: {
+    positive: {
+      mixed: ['Иван Иванов','John Smith','Мария Петрова','Test User','Анна-Мария','José García','Björn Borg','Müller GmbH','Ли Вэй','김민준','محمد علي'],
+      en:    ['John Smith','Jane Doe','Alice Cooper','Bob Martin','Test Input','Hello World','Sample Text','Quick Brown Fox'],
+      ru:    ['Иван Иванов','Мария Петрова','Алексей Смирнов','Анна Козлова','Привет мир','Тестовый ввод'],
+      unicode: ['Héllo Wörld','Ñoño García','Ångström unit','Ünïcödé tëxt','Ĉu vi parolas?']
+    },
+    negative: [
+      { v: '   ', label: 'Только пробелы' },
+      { v: '\n\n\n', label: 'Только переносы строк' },
+      { v: '\t\t\t', label: 'Только табуляция' },
+      { v: 'null', label: 'Строка "null"' },
+      { v: 'undefined', label: 'Строка "undefined"' },
+      { v: '0', label: 'Строка "0"' },
+      { v: 'false', label: 'Строка "false"' },
+      { v: 'NaN', label: 'Строка "NaN"' },
+      { v: '\r\n', label: 'CRLF' },
+      { v: '\u0000', label: 'Null-символ (\\u0000)' },
+      { v: '\u00A0', label: 'Неразрывный пробел' },
+      { v: '\u200B', label: 'Zero-width space' },
+      { v: 'true', label: 'Строка "true"' }
+    ],
+    special: {
+      mixed: ['Иванов Иван Иванович','José García Martínez','Müller, Björn','李小龙','محمد عبدالله','日本語テスト','한국어 테스트','ελληνικά','हिन्दी','Ångström','Ñoño','Ĉu vi?','Привет Hello 123','emoji 👋🎉','™©®€£¥'],
+      en:    ['Hello World','Test & Value','"quoted text"',"it's apostrophe",'ALL CAPS','lower case','MiXeD cAsE','with  double  spaces','trailing space ','  leading space','tab\there','line\nbreak'],
+      ru:    ['Привет','Ёжик в тумане','БОЛЬШИМИ БУКВАМИ','маленькими','Ё — особая буква','Санкт-Петербург','Москва, ул. Ленина д.1','ООО «Рога и Копыта»'],
+      unicode: ['👋🏽 emoji','zero\u200Bwidth','\uFEFFBOM','𝔘𝔫𝔦𝔠𝔬𝔡𝔢','a\u0300 composed','re\u202Eversed','𐐷 old italic','\u{1F600} face','\u2603 snowman','½ ⅓ ⅔ ¼']
+    },
+    security: [
+      { v: '<script>alert(1)<\/script>', label: 'XSS — script tag' },
+      { v: '<img src=x onerror=alert(1)>', label: 'XSS — img onerror' },
+      { v: '<svg onload=alert(1)>', label: 'XSS — svg onload' },
+      { v: 'javascript:alert(1)', label: 'XSS — javascript:' },
+      { v: '" OR 1=1 --', label: 'SQLi — OR 1=1' },
+      { v: "'; DROP TABLE users; --", label: 'SQLi — DROP TABLE' },
+      { v: "' UNION SELECT * FROM users--", label: 'SQLi — UNION SELECT' },
+      { v: "admin'--", label: 'SQLi — auth bypass' },
+      { v: '{{7*7}}', label: 'SSTI — template' },
+      { v: '${7*7}', label: 'SSTI — expression' },
+      { v: '#{7*7}', label: 'SSTI — EL injection' },
+      { v: '../../../etc/passwd', label: 'Path traversal' },
+      { v: '..\\..\\..\\windows\\system32', label: 'Path traversal Windows' },
+      { v: '%00null', label: 'Null byte injection' },
+      { v: '<!--comment-->', label: 'HTML comment' },
+      { v: '&lt;script&gt;', label: 'HTML-encoded XSS' }
+    ]
+  },
+  email: {
+    positive: [
+      { v: 'user@example.com', label: 'Стандартный' },
+      { v: 'test.user@company.org', label: 'С точкой' },
+      { v: 'ivan.petrov@mail.ru', label: 'RU домен' },
+      { v: 'support+tag@service.io', label: 'Плюс-адрес' },
+      { v: 'info@subdomain.example.com', label: 'Субдомен' },
+      { v: 'qa_team@test-corp.net', label: 'С подчёркиванием' },
+      { v: 'user123@example.co.uk', label: 'ccTLD' }
+    ],
+    negative: [
+      { v: 'notanemail', label: 'Нет @' },
+      { v: '@nodomain.com', label: 'Нет локальной части' },
+      { v: 'user@', label: 'Нет домена' },
+      { v: 'user@@domain.com', label: 'Двойной @' },
+      { v: 'user @domain.com', label: 'Пробел в адресе' },
+      { v: 'user@domain', label: 'Нет TLD' },
+      { v: '', label: 'Пустая строка' },
+      { v: 'user@-domain.com', label: 'Домен начинается с дефиса' },
+      { v: '.user@domain.com', label: 'Точка в начале' },
+      { v: 'user.@domain.com', label: 'Точка перед @' },
+      { v: 'us er@domain.com', label: 'Пробел в локальной части' }
+    ],
+    special: [
+      { v: 'user+tag@example.com', label: 'Плюс-адрес' },
+      { v: '"user name"@example.com', label: 'Кавычки в локальной части' },
+      { v: 'user.name+tag@sub.domain.co.uk', label: 'Сложный валидный' },
+      { v: 'UPPER@CASE.COM', label: 'Верхний регистр' },
+      { v: 'пользователь@домен.рф', label: 'IDN / кириллица' },
+      { v: 'user+123@example.com', label: 'Плюс с цифрами' },
+      { v: '1234567890@example.com', label: 'Только цифры в локальной части' }
+    ],
+    security: [
+      { v: '<script>@example.com', label: 'XSS в email' },
+      { v: "' OR '1'='1@x.com", label: 'SQLi вместо email' },
+      { v: 'user%40example.com', label: 'URL-кодированный @' },
+      { v: 'user@example.com\r\nBcc:victim@evil.com', label: 'Email header injection' },
+      { v: '"<script>"@example.com', label: 'XSS в кавычках' }
+    ]
+  },
+  password: {
+    positive: [
+      { v: 'MyP@ssw0rd!', label: 'Сильный пароль' },
+      { v: 'Correct-Horse-42', label: 'Парольная фраза' },
+      { v: 'Tr0ub4dor&3', label: 'Классический сложный' },
+      { v: 'P@$$word123!', label: 'Буквы + цифры + символы' },
+      { v: 'SecurePass#2024', label: 'С годом' },
+      { v: 'qwerty_QW1!', label: 'На основе простого' }
+    ],
+    negative: [
+      { v: '        ', label: 'Только пробелы' },
+      { v: 'password', label: 'Слабый — "password"' },
+      { v: '12345678', label: 'Только цифры' },
+      { v: 'AAAAAAAA', label: 'Один символ x8' },
+      { v: 'qwerty', label: 'Клавиатурный' },
+      { v: '111111', label: 'Одни единицы' },
+      { v: 'abc', label: 'Слишком короткий' },
+      { v: '', label: 'Пустой' }
+    ],
+    special: [
+      { v: 'P@$$w0rd!', label: 'Спецсимволы' },
+      { v: 'correct horse battery', label: 'Пробелы внутри' },
+      { v: '"><img src=x>', label: 'HTML в пароле' },
+      { v: '½☆★✓©®™', label: 'Unicode символы' },
+      { v: 'пАроль123!', label: 'Кириллица + латиница' },
+      { v: '\u0000pass', label: 'Null-байт в начале' }
+    ],
+    security: [
+      { v: "' OR '1'='1' --", label: 'SQLi классический' },
+      { v: '<script>document.cookie<\/script>', label: 'XSS' },
+      { v: '${7*7}', label: 'SSTI (expression)' },
+      { v: '%s%s%s%s%s', label: 'Format string' },
+      { v: "admin'--", label: 'SQLi auth bypass' },
+      { v: '\\x27 OR 1=1', label: 'Hex SQLi' }
+    ]
+  },
+  number: {
+    negative: [
+      { v: '', label: 'Пустое поле' },
+      { v: 'abc', label: 'Строка вместо числа' },
+      { v: '1.2.3', label: 'Два десятичных разделителя' },
+      { v: '1,234', label: 'Запятая как разделитель' },
+      { v: 'NaN', label: 'NaN' },
+      { v: 'Infinity', label: 'Infinity' },
+      { v: '-Infinity', label: '-Infinity' },
+      { v: '-0', label: 'Отрицательный ноль' },
+      { v: '1e999', label: 'Экспоненциальное переполнение' },
+      { v: '0x10', label: 'Hex нотация' },
+      { v: ' 42 ', label: 'Пробелы вокруг числа' },
+      { v: '42,0', label: 'Запятая вместо точки' }
+    ],
+    special: [
+      { v: '0.1', label: 'Десятичная дробь' },
+      { v: '0.1', label: 'Float — 0.1+0.2 ловушка' },
+      { v: '-2147483648', label: 'INT32 min' },
+      { v: '2147483647', label: 'INT32 max' },
+      { v: '9007199254740991', label: 'MAX_SAFE_INTEGER' },
+      { v: '-9007199254740991', label: 'MIN_SAFE_INTEGER' },
+      { v: '0xFF', label: 'Hex-формат' },
+      { v: '007', label: 'Leading zeros' },
+      { v: '1e10', label: 'Экспоненциальная запись' },
+      { v: '3.14159265358979', label: 'Много знаков после точки' }
+    ],
+    security: [
+      { v: "1; DROP TABLE--", label: 'SQLi в числе' },
+      { v: repeat('9', 20), label: 'Переполнение (20 цифр)' },
+      { v: '1/0', label: 'Деление на ноль' },
+      { v: '{{7*7}}', label: 'Template injection' },
+      { v: '-1', label: 'Отрицательное (для unsigned полей)' }
+    ]
+  },
+  date: {
+    positive: [
+      { v: '2024-06-15', label: 'Обычная дата' },
+      { v: '2000-01-01', label: 'Начало нулевых' },
+      { v: '1990-12-31', label: 'Конец года' },
+      { v: '2024-02-29', label: 'Высокосный февраль' },
+      { v: '2023-11-30', label: 'Последний день ноября' },
+      { v: '2024-07-04', label: 'Середина года' }
+    ],
+    boundary: [
+      { v: '1970-01-01', label: 'Unix epoch' },
+      { v: '1900-01-01', label: 'Очень старая дата' },
+      { v: '9999-12-31', label: 'Очень далёкая дата' },
+      { v: '2000-02-29', label: 'Высокосный год (верно)' },
+      { v: '2001-02-29', label: 'Не высокосный — невалидно' },
+      { v: '2024-01-01', label: 'Первый день года' },
+      { v: '2024-12-31', label: 'Последний день года' }
+    ],
+    negative: [
+      { v: '', label: 'Пустое' },
+      { v: '13/32/2024', label: 'Несуществующая дата' },
+      { v: '2024-13-01', label: 'Месяц 13' },
+      { v: '2024-00-00', label: 'Нулевые значения' },
+      { v: '01-01-2024', label: 'Формат DD-MM-YYYY' },
+      { v: 'вчера', label: 'Текст вместо даты' },
+      { v: '2024/06/15', label: 'Слэши вместо дефисов' },
+      { v: '15.06.2024', label: 'Европейский формат с точками' },
+      { v: 'June 15, 2024', label: 'Словесный формат' },
+      { v: '2024-02-30', label: 'Несуществующее 30 февраля' }
+    ],
+    special: [
+      { v: '2024-02-28', label: 'День до конца февраля' },
+      { v: '2024-03-01', label: 'День после февраля' },
+      { v: '2024-12-31 23:59:59', label: 'Конец года с временем' },
+      { v: '2024-01-01T00:00:00Z', label: 'ISO 8601 с UTC' },
+      { v: '2024-07-15T12:00:00+03:00', label: 'Timezone offset' },
+      { v: '2024-03-31', label: 'Последний день марта' },
+      { v: '2024-06-01', label: 'Первый день июня' }
+    ],
+    security: [
+      { v: "' OR '1'='1", label: 'SQLi в дате' },
+      { v: '../2024/../../etc', label: 'Path traversal' },
+      { v: '<script>new Date()<\/script>', label: 'XSS в поле даты' }
+    ]
+  },
+  phone: {
+    positive: [
+      { v: '+79991234567', label: 'Валидный RU' },
+      { v: '89161234567', label: 'Валидный RU (8)' },
+      { v: '+44 20 7946 0958', label: 'Валидный UK' },
+      { v: '+1 415 555 0100', label: 'Валидный US' },
+      { v: '+49 30 12345678', label: 'Валидный DE' },
+      { v: '+33 1 23 45 67 89', label: 'Валидный FR' }
+    ],
+    boundary: [
+      { v: '+79991234567', label: 'Стандартный (11 цифр)' },
+      { v: '+1234567890123456', label: 'Слишком длинный (16)' },
+      { v: '+1', label: 'Слишком короткий' },
+      { v: '+12', label: 'Очень короткий' },
+      { v: '+123456789012345', label: 'Граничная длина (15)' }
+    ],
+    negative: [
+      { v: '', label: 'Пустое' },
+      { v: 'не телефон', label: 'Текст' },
+      { v: '000-000-0000', label: 'Нулевой номер' },
+      { v: '++79991234567', label: 'Двойной +' },
+      { v: '79991234567890', label: 'Слишком много цифр' },
+      { v: 'abcdefghijk', label: 'Буквы вместо цифр' },
+      { v: '+7(999)123-45-6', label: 'Неполный номер' }
+    ],
+    special: [
+      { v: '+7 (999) 123-45-67', label: 'Со скобками и пробелами' },
+      { v: '8-999-123-45-67', label: 'С дефисами' },
+      { v: '+1 (800) CALL-NOW', label: 'Буквенный формат USA' },
+      { v: '+7.999.123.45.67', label: 'С точками' },
+      { v: '007 99 123 45 67', label: 'Ведущие нули' }
+    ],
+    security: [
+      { v: "'+OR+1=1--", label: 'SQLi в телефоне' },
+      { v: '<img src=x onerror=alert(1)>', label: 'XSS тег' },
+      { v: '+7999\r\nX-Injected: header', label: 'Header injection' }
+    ]
+  },
+  url: {
+    positive: [
+      { v: 'https://example.com', label: 'Стандартный HTTPS' },
+      { v: 'https://example.com/path/to/page', label: 'С путём' },
+      { v: 'https://example.com/search?q=test&page=1', label: 'С параметрами' },
+      { v: 'https://subdomain.example.co.uk', label: 'Субдомен + ccTLD' },
+      { v: 'https://example.com:8080/api', label: 'С портом' },
+      { v: 'http://example.com', label: 'HTTP (не HTTPS)' }
+    ],
+    boundary: [
+      { v: 'http://a.io', label: 'Минимальный валидный' },
+      { v: 'https://example.com', label: 'Стандартный' },
+      { v: 'https://' + repeat('a', 200) + '.com', label: 'Очень длинный (200+ симв.)' },
+      { v: 'https://' + repeat('a', 253) + '.com', label: 'Макс. длина домена (253)' }
+    ],
+    negative: [
+      { v: '', label: 'Пустой' },
+      { v: 'notaurl', label: 'Нет протокола' },
+      { v: 'http://', label: 'Нет домена' },
+      { v: 'http://localhost', label: 'Localhost' },
+      { v: 'ftp://example.com', label: 'FTP вместо HTTP' },
+      { v: 'https://256.256.256.256', label: 'Невалидный IP' },
+      { v: '//example.com', label: 'Protocol-relative URL' },
+      { v: 'https:/example.com', label: 'Один слэш' }
+    ],
+    special: [
+      { v: 'https://example.com/path?q=1&b=2#hash', label: 'Полный URL с параметрами' },
+      { v: 'https://user:pass@example.com', label: 'С credentials' },
+      { v: 'https://кириллица.рф/путь', label: 'IDN URL' },
+      { v: 'https://example.com/%20path%20', label: 'URL-encoded пробелы' },
+      { v: 'https://xn--e1afmkfd.xn--p1ai/', label: 'Punycode' }
+    ],
+    security: [
+      { v: 'javascript:alert(1)', label: 'JavaScript scheme' },
+      { v: 'https://evil.com@trusted.com', label: 'URL confusion' },
+      { v: 'https://example.com/../../etc/passwd', label: 'Path traversal' },
+      { v: 'file:///etc/passwd', label: 'File protocol' },
+      { v: 'data:text/html,<script>alert(1)<\/script>', label: 'Data URI XSS' }
+    ]
+  },
+  username: {
+    positive: [
+      { v: 'john_doe', label: 'Стандартный' },
+      { v: 'user123', label: 'Буквы + цифры' },
+      { v: 'test-user', label: 'С дефисом' },
+      { v: 'alice', label: 'Короткий' },
+      { v: 'super_admin_2024', label: 'Длинный' },
+      { v: 'QA_tester', label: 'Смешанный регистр' }
+    ],
+    boundary: [
+      { v: '', label: 'Пустой' },
+      { v: 'a', label: '1 символ' },
+      { v: 'ab', label: '2 символа' }
+    ],
+    negative: [
+      { v: '   spaces   ', label: 'Пробелы' },
+      { v: 'user name', label: 'Пробел внутри' },
+      { v: '-username', label: 'Начинается с дефиса' },
+      { v: 'user@name', label: 'Содержит @' },
+      { v: '123456', label: 'Только цифры' },
+      { v: '', label: 'Пустой' },
+      { v: 'user!name', label: 'Восклицательный знак' },
+      { v: 'user name!', label: 'Пробел и спецсимвол' }
+    ],
+    special: [
+      { v: 'user_name-123', label: 'Допустимые спецсимволы' },
+      { v: 'UPPERCASE', label: 'Верхний регистр' },
+      { v: '__root__', label: 'Двойное подчёркивание' },
+      { v: 'user.name', label: 'С точкой' },
+      { v: 'Ивано_ff', label: 'Кириллица + латиница' }
+    ],
+    security: [
+      { v: 'admin', label: 'Зарезервированное имя' },
+      { v: 'root', label: 'Системное имя' },
+      { v: '<admin>', label: 'HTML теги' },
+      { v: "'; SELECT * FROM users--", label: 'SQLi' },
+      { v: '../../../admin', label: 'Path traversal' },
+      { v: 'administrator', label: 'Системное имя 2' }
+    ]
+  }
+};
+
+// ─── main generator ────────────────────────────────────────────────────────────
+function buildCategory(type, cat, min, max, locale, randLevel) {
+  var p = POOLS[type];
+  if (!p) p = POOLS.text;
+
+  // Граничные значения — логика одинакова для всех, но char рандомный
+  if (cat === 'boundary') {
+    // для числового типа — отдельная логика
+    if (type === 'number') {
+      var mid = Math.floor((min + max) / 2);
+      var items = [
+        { v: String(min - 1), label: 'Меньше минимума (' + (min-1) + ')' },
+        { v: String(min), label: 'Ровно минимум (' + min + ')' },
+        { v: String(min + 1), label: 'Минимум + 1 (' + (min+1) + ')' },
+        { v: String(mid), label: 'Середина (' + mid + ')' },
+        { v: String(max - 1), label: 'Максимум − 1 (' + (max-1) + ')' },
+        { v: String(max), label: 'Ровно максимум (' + max + ')' },
+        { v: String(max + 1), label: 'Превышение (' + (max+1) + ')' }
+      ];
+      if (randLevel !== 'low') {
+        items.push({ v: String(randInt(min, max)), label: 'Случайное допустимое', rand: true });
+        items.push({ v: String(randInt(min, max)), label: 'Случайное допустимое 2', rand: true });
+      }
+      return items;
+    }
+    // для дат — используем статичный пул + случайная дата
+    if (type === 'date') {
+      var base = p.boundary ? pick(p.boundary, 5) : [];
+      if (randLevel !== 'low') base.push({ v: randDate(), label: 'Случайная корректная дата', rand: true });
+      return base;
+    }
+    // для остальных — рандомный char, фиксированные длины
+    var chars = ['A','B','а','ж','x','я','Z','1','@','#'];
+    var filler = pickOne(chars);
+    var result = [];
+    var midLen = Math.floor((min + max) / 2);
+    if (min > 0) {
+      if (min > 1) result.push({ v: repeat(filler, min-1), label: 'Меньше минимума (' + (min-1) + ' симв.)' });
+      result.push({ v: repeat(filler, min), label: 'Ровно минимум (' + min + ' симв.)' });
+      if (min + 1 < max) result.push({ v: repeat(filler, min+1), label: 'Минимум + 1 (' + (min+1) + ' симв.)' });
+    } else {
+      result.push({ v: '', label: 'Пустая строка' });
+      result.push({ v: ' ', label: '1 пробел' });
+      result.push({ v: filler, label: '1 символ' });
+    }
+    if (midLen > min+1 && midLen < max-1)
+      result.push({ v: repeat(filler, midLen), label: 'Середина (' + midLen + ' симв.)' });
+    if (max > 2) result.push({ v: repeat(filler, max-1), label: 'Максимум − 1 (' + (max-1) + ' симв.)' });
+    result.push({ v: repeat(filler, max), label: 'Ровно максимум (' + max + ' симв.)' });
+    result.push({ v: repeat(filler, max+1), label: 'Превышение на 1 (' + (max+1) + ' симв.)' });
+    if (randLevel !== 'low') {
+      var rLen = randInt(Math.max(min,1), Math.min(max, 20));
+      result.push({ v: randString(rLen, locale), label: 'Случайная строка (' + rLen + ' симв.)', rand: true });
+    }
+    return result;
+  }
+
+  // Позитивные
+  if (cat === 'positive') {
+    var pool, chosen;
+    if (type === 'text') {
+      pool = p.positive[locale] || p.positive.mixed;
+      // фильтруем по длине
+      var valid = pool.filter(function(s) { return s.length >= min && s.length <= max; });
+      if (!valid.length) valid = pool;
+      chosen = pick(valid, randLevel === 'high' ? 4 : 3).map(function(v) { return { v: v, label: 'Валидный ввод' }; });
+    } else {
+      pool = p.positive || [];
+      chosen = pick(pool, randLevel === 'high' ? 4 : 3);
+    }
+    // добавляем рандомные
+    if (randLevel !== 'low') {
+      if (type === 'text') {
+        var rLen3 = randInt(Math.max(min,1), Math.min(max, 15));
+        chosen.push({ v: randString(rLen3, locale), label: 'Случайное валидное (' + rLen3 + ' симв.)', rand: true });
+      }
+      if (type === 'email')    chosen.push({ v: randEmail(), label: 'Случайный email', rand: true });
+      if (type === 'date')     chosen.push({ v: randDate(), label: 'Случайная дата', rand: true });
+      if (type === 'phone')    chosen.push({ v: randPhone(), label: 'Случайный телефон', rand: true });
+      if (type === 'url')      chosen.push({ v: randUrl(), label: 'Случайный URL', rand: true });
+      if (type === 'username') chosen.push({ v: randUsername(), label: 'Случайный логин', rand: true });
+      if (type === 'password') {
+        var specials = '!@#$%^&*';
+        var rPass = randFrom(ALPHA_EN, 3).toUpperCase() + randFrom(ALPHA_EN, 3) + randFrom(DIGITS, 2) + pickOne(specials.split(''));
+        chosen.push({ v: rPass, label: 'Случайный пароль', rand: true });
+      }
+      if (type === 'number') {
+        var rNum = randInt(min, max);
+        chosen = [
+          { v: String(min), label: 'Минимум (' + min + ')' },
+          { v: String(Math.floor((min+max)/2)), label: 'Среднее (' + Math.floor((min+max)/2) + ')' },
+          { v: String(max), label: 'Максимум (' + max + ')' },
+          { v: String(rNum), label: 'Случайное (' + rNum + ')', rand: true }
+        ];
+      }
+    }
+    return chosen;
+  }
+
+  // Негативные / special / security — перемешиваем пул и берём N штук
+  var srcPool;
+  if (cat === 'negative') srcPool = p.negative;
+  if (cat === 'special') {
+    srcPool = (type === 'text')
+      ? (p.special[locale] || p.special.mixed).map(function(v) { return { v: v, label: 'Спецввод' }; })
+      : p.special;
+  }
+  if (cat === 'security') srcPool = p.security || POOLS.text.security;
+
+  if (!srcPool || !srcPool.length) return [];
+
+  var n = randLevel === 'high' ? Math.min(srcPool.length, 8)
+        : randLevel === 'med'  ? Math.min(srcPool.length, 6)
+        : Math.min(srcPool.length, 5);
+
+  var result2 = pick(srcPool, n);
+
+  // при высокой рандомизации добавляем сгенерированные значения
+  if (randLevel === 'high') {
+    if (cat === 'negative' && type === 'text') {
+      result2.push({ v: randFrom(SPECIAL, randInt(3,8)), label: 'Случайные спецсимволы', rand: true });
+      result2.push({ v: repeat(' ', randInt(2,10)), label: 'Случайные пробелы', rand: true });
+    }
+    if (cat === 'special' && type === 'text') {
+      var rMixed = randFrom(ALPHA_EN + ALPHA_RU + DIGITS + '!@# ', randInt(5, 15));
+      result2.push({ v: rMixed, label: 'Случайный микс символов', rand: true });
+    }
+    if (cat === 'security') {
+      // рандомно изменяем один из атак (меняем payload число)
+      var n2 = randInt(2, 99);
+      result2.push({ v: '<img src=' + n2 + ' onerror=alert(' + n2 + ')>', label: 'Вариация XSS #' + n2, rand: true });
+    }
+  }
+
+  return result2;
+}
+
+// ─── ui helpers ───────────────────────────────────────────────────────────────
+var catMeta = {
+  positive: { label: 'Позитивные значения',       cls: 'tag-pos'   },
+  boundary: { label: 'Граничные значения',         cls: 'tag-bound' },
+  negative: { label: 'Негативные / некорректные', cls: 'tag-neg'   },
+  special:  { label: 'Спецсимволы и кодировки',   cls: 'tag-spec'  },
+  security: { label: 'Безопасность (XSS, SQLi)',  cls: 'tag-sec'   }
+};
+
+var generated = [];
+
+function getSelected(id) {
+  var el = document.getElementById(id), r = [];
+  for (var i = 0; i < el.options.length; i++)
+    if (el.options[i].selected) r.push(el.options[i].value);
+  return r;
+}
+
+function escHTML(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function generate() {
+  var type      = document.getElementById('fieldType').value;
+  var min       = parseInt(document.getElementById('minLen').value) || 0;
+  var max       = parseInt(document.getElementById('maxLen').value) || 255;
+  var cats      = getSelected('categories');
+  var locale    = document.getElementById('locale').value;
+  var randLevel = document.getElementById('randLevel').value;
+  if (min > max) min = 0;
+
+  // новый seed на каждый клик
+  var seed = Date.now() ^ Math.floor(Math.random() * 0xFFFFFF);
+  seedRng(seed);
+  document.getElementById('seedInfo').textContent = 'seed: ' + seed.toString(16);
+
+  var source = POOLS[type] || POOLS.text;
+  generated = [];
+  var html = '';
+  var total = 0;
+
+  for (var c = 0; c < cats.length; c++) {
+    var cat = cats[c];
+    var meta = catMeta[cat];
+    var items = buildCategory(type, cat, min, max, locale, randLevel);
+    if (!items || !items.length) continue;
+
+    html += '<div class="category-block"><p class="cat-title">' + meta.label + '</p><div class="items-list">';
+
+    for (var i = 0; i < items.length; i++) {
+      var val = items[i].v;
+      var lbl = items[i].label;
+      var isRand = items[i].rand;
+      generated.push({ category: meta.label, value: val, description: lbl });
+      total++;
+      var displayHTML = (val === '')
+        ? '<span class="item-empty">пустая строка</span>'
+        : escHTML(val);
+      html += '<div class="item-row">'
+            + '<span class="item-val">' + displayHTML + '</span>'
+            + (isRand ? '<span class="rand-badge">rand</span>' : '')
+            + '<span class="tag ' + meta.cls + '">' + escHTML(lbl) + '</span>'
+            + '<button class="copy-btn" data-idx="' + (generated.length-1) + '">копировать</button>'
+            + '</div>';
+    }
+    html += '</div></div>';
+  }
+
+  document.getElementById('emptyState').style.display = 'none';
+  if (!html) {
+    document.getElementById('emptyState').style.display = '';
+    document.getElementById('emptyState').textContent = 'Выберите хотя бы одну категорию';
+    document.getElementById('results').innerHTML = '';
+    document.getElementById('exportBtn').style.display = 'none';
+    document.getElementById('resultsHeader').style.display = 'none';
+    return;
+  }
+  document.getElementById('results').innerHTML = html;
+  document.getElementById('resultsHeader').style.display = 'flex';
+  document.getElementById('resultsCount').textContent = total + ' значений';
+  document.getElementById('exportBtn').style.display = '';
+}
+
+document.getElementById('results').addEventListener('click', function(e) {
+  var btn = e.target;
+  if (!btn.classList.contains('copy-btn')) return;
+  var idx = parseInt(btn.getAttribute('data-idx'));
+  var val = generated[idx].value;
+  function showCopied() {
+    btn.textContent = '✓ скопировано';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'копировать'; btn.classList.remove('copied'); }, 1400);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(val).then(showCopied);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = val; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showCopied();
+  }
+});
+
+document.getElementById('generateBtn').addEventListener('click', generate);
+
+document.getElementById('exportBtn').addEventListener('click', function() {
+  var rows = [['Категория','Значение','Описание','Рандомное']];
+  for (var i = 0; i < generated.length; i++)
+    rows.push([generated[i].category, generated[i].value, generated[i].description, generated[i].rand ? 'да' : '']);
+  var csv = rows.map(function(r) {
+    return r.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'test_data.csv'; a.click();
+});
+</script>
+</body>
+</html>
