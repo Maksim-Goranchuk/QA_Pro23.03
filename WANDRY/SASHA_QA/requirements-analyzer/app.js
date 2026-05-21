@@ -4,7 +4,7 @@ import { GEMINI_API_KEY } from './config.js';
 // Константы
 // ───────────────────────────────────────────────
 
-const MODEL = 'gemini-2.0-flash';
+const MODEL = 'gemini-2.5-flash';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 const SYSTEM_PROMPT = `Ты — опытный QA-инженер. Пользователь даёт описание фичи/требований, а ты генерируешь структурированный список тест-кейсов.
@@ -52,6 +52,7 @@ async function runAnalysis() {
 
   try {
     const checks = await fetchChecks(text);
+    
     renderResults(checks);
 
     const total = Object.values(checks).flat().length;
@@ -82,6 +83,7 @@ async function fetchChecks(description) {
       generationConfig: {
         temperature: 0.2,
         maxOutputTokens: 1500,
+        responseMimeType: 'application/json',
       },
     }),
   });
