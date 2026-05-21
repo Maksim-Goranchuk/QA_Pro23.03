@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Анализатор требований — QA Checklist Generator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="header__title">Анализатор требований</h1>
+      <p class="header__sub">Вставьте описание фичи — получите чеклист позитивных, негативных и граничных проверок</p>
+    </header>
+
+    <main class="main">
+      <section class="input-section">
+        <label for="featureInput" class="input-label">Описание фичи / требования</label>
+        <textarea
+          id="featureInput"
+          class="textarea"
+          placeholder="Пример: Форма регистрации пользователя. Поля: имя (обязательно, 2–50 символов), email (обязательно, уникальный), пароль (минимум 8 символов, латиница + цифры). После успешной регистрации — редирект на /dashboard и письмо на почту."
+        ></textarea>
+        <div class="input-row">
+          <button class="btn-primary" id="runBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            Сгенерировать проверки
+          </button>
+          <button class="btn-secondary" id="clearBtn">Очистить</button>
+          <span class="status-msg" id="statusMsg"></span>
+        </div>
+      </section>
+
+      <div class="error-box" id="errorBox" hidden></div>
+
+      <section class="results" id="results" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
