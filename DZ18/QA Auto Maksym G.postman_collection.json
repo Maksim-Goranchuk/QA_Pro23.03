@@ -1,0 +1,1163 @@
+{
+  "info": {
+    "_postman_id": "93e909f2-c6ba-48df-89fb-cfef33d17ccd",
+    "name": "QA Auto Maksym G",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29979257"
+  },
+  "item": [
+    {
+      "name": "Email Validation - Negative Tests",
+      "item": [
+        {
+          "name": "Register - Invalid Email Format (no @)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 for invalid email format (no @)\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "});",
+                  "",
+                  "pm.test('Response has message field', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "})",
+                  "",
+                  "pm.test('Message is \\'Email is incorrect\\'', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Email is incorrect');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test User\", \"email\": \"invalidemail.com\", \"password\": \"Password1!\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Invalid Email Format (no domain)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 for email without domain\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "});",
+                  "",
+                  "pm.test('Response has message field', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "})",
+                  "",
+                  "pm.test('Message is \\'Email is incorrect\\'', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Email is incorrect');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test User\", \"email\": \"user@\", \"password\": \"Password1!\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Empty Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 for empty email\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "});",
+                  "",
+                  "pm.test('Response has message field', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "})",
+                  "",
+                  "pm.test('Message is \\'Email is incorrect\\'', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Email is incorrect');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test User\", \"email\": \"\", \"password\": \"Password1!\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Missing Email Field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 for missing email field\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "});",
+                  "",
+                  "pm.test('Response has message field', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "})",
+                  "",
+                  "pm.test('Message is \\'Email is incorrect\\'', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Email is incorrect');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test User\", \"password\": \"Password1!\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Duplicate Email",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Use the already registered email to trigger duplicate error",
+                  "const existingEmail = pm.environment.get(\"email\");",
+                  "if (!existingEmail) {",
+                  "    pm.environment.set(\"email\", \"duplicate@qauto.com\");",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409 for duplicate email\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test(\"Error message present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "});",
+                  "",
+                  "pm.test('Response has message field', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "})",
+                  "",
+                  "pm.test('Message is \\'User already exists\\'', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('User already exists');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test User\", \"email\": \"{{email}}\", \"password\": \"Password1!\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Email with Spaces",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 for email with spaces\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "});",
+                  "",
+                  "pm.test('Response has message field', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "})",
+                  "",
+                  "pm.test('Message is \\'Email is incorrect\\'', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Email is incorrect');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test User\", \"email\": \"user name@qauto.com\", \"password\": \"Password1!\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Email Too Long (>255 chars)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 for email too long\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "});",
+                  "",
+                  "pm.test('Response has message field', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "})",
+                  "",
+                  "pm.test('Message is \\'Email is incorrect\\'', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Email is incorrect');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test User\", \"email\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@qauto.com\", \"password\": \"Password1!\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - SQL Injection in Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 for SQL injection in email\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message present\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"message\");",
+                  "});",
+                  "",
+                  "pm.test('Response has message field', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "})",
+                  "",
+                  "pm.test('Message is \\'Email is incorrect\\'', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Email is incorrect');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test User\", \"email\": \"' OR '1'='1\", \"password\": \"Password1!\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile Update - Negative Tests",
+      "item": []
+    },
+    {
+      "name": "Register",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Generate unique email and save to environment",
+              "const randomStr = Math.random().toString(36).substring(2, 10);",
+              "const uniqueEmail = `testuser_${randomStr}@qauto.com`;",
+              "pm.environment.set(\"email\", uniqueEmail);",
+              "",
+              "// Set initial password if not set",
+              "if (!pm.environment.get(\"password\")) {",
+              "    pm.environment.set(\"password\", \"Password1!\");",
+              "}",
+              "",
+              "console.log(\"Generated email:\", uniqueEmail);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "// ── JSON Schema Validation ──────────────────────────────────────────────────",
+              "var schema = {",
+              "    \"type\": \"object\",",
+              "    \"required\": [\"status\", \"data\"],",
+              "    \"properties\": {",
+              "        \"status\": {",
+              "            \"type\": \"string\",",
+              "            \"enum\": [\"ok\"]",
+              "        },",
+              "        \"data\": {",
+              "            \"type\": \"object\",",
+              "            \"required\": [\"userId\", \"email\", \"name\", \"lastName\", \"dateBirth\", \"phone\"],",
+              "            \"properties\": {",
+              "                \"userId\":    { \"type\": \"integer\" },",
+              "                \"email\":     { \"type\": \"string\", \"format\": \"email\" },",
+              "                \"name\":      { \"type\": \"string\" },",
+              "                \"lastName\":  { \"type\": \"string\" },",
+              "                \"dateBirth\": { \"type\": [\"string\", \"null\"] },",
+              "                \"phone\":     { \"type\": [\"string\", \"null\"] }",
+              "            },",
+              "            \"additionalProperties\": true",
+              "        }",
+              "    }",
+              "};",
+              "",
+              "pm.test(\"Response matches JSON Schema\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(tv4.validate(jsonData, schema)).to.be.true;",
+              "});",
+              "",
+              "// ── Regex: email format in response ────────────────────────────────────────",
+              "pm.test(\"Email in response has valid format (regex)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;",
+              "    pm.expect(jsonData.data.email).to.match(emailRegex);",
+              "});",
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has token or session\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"status\", \"ok\");",
+              "});",
+              "",
+              "// ── Response time check ─────────────────────────────────────────────────────",
+              "pm.test(\"Response time is less than 500ms\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(500);",
+              "});",
+              "",
+              "// ── Content-Type header check ───────────────────────────────────────────────",
+              "pm.test(\"Content-Type header is present and is application/json\", function () {",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"remember\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/signin",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "signin"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Car",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response has car data\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"data\");",
+              "});",
+              "",
+              "pm.test(\"Save carId to environment\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    if (jsonData.data && jsonData.data.id) {",
+              "        pm.environment.set(\"carId\", jsonData.data.id);",
+              "        console.log(\"Saved carId:\", jsonData.data.id);",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"carBrandId\": 1,\n  \"carModelId\": 1,\n  \"mileage\": 122\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cars",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cars"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Expense",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 or 201\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              "",
+              "pm.test(\"Expense created with correct carId\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property(\"carId\", parseInt(pm.environment.get(\"carId\")));",
+              "});"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// ── Increment mileage and cost on each run ──────────────────────────────────",
+              "var currentMileage = parseInt(pm.environment.get(\"mileage\") || \"10000\", 10);",
+              "var currentCost = parseFloat(pm.environment.get(\"cost\") || \"50.00\");",
+              "",
+              "// Add random increment: mileage +50..+200, cost +10..+100",
+              "var mileageIncrement = Math.floor(Math.random() * 151) + 50;",
+              "var costIncrement = Math.floor(Math.random() * 91) + 10;",
+              "",
+              "var newMileage = currentMileage + mileageIncrement;",
+              "var newCost = parseFloat((currentCost + costIncrement).toFixed(2));",
+              "",
+              "pm.environment.set(\"mileage\", newMileage.toString());",
+              "pm.environment.set(\"cost\", newCost.toString());",
+              "",
+              "console.log(\"Mileage: \" + newMileage + \" | Cost: \" + newCost);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"carId\": {{carId}},\n    \"reportedAt\": \"{{$isoTimestamp}}\",\n    \"mileage\": {{mileage}},\n    \"liters\": 40,\n    \"totalCost\": {{cost}},\n    \"forceMileage\": false\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/expenses",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "expenses"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Change Password",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Update password variable after successful change\", function () {",
+              "    if (pm.response.code === 200) {",
+              "        pm.environment.set(\"password\", \"NewPassword1!\");",
+              "        console.log(\"Password updated in environment to: NewPassword1!\");",
+              "    }",
+              "});",
+              "",
+              "// ── userId matches registration ─────────────────────────────────────────────",
+              "pm.test(\"userId in response matches registered userId from environment\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var registeredUserId = parseInt(pm.environment.get(\"userId\"), 10);",
+              "    pm.expect(jsonData.data.userId).to.eql(registeredUserId);",
+              "});",
+              "",
+              "// ── Update password variable after success ──────────────────────────────────",
+              "pm.test(\"Password variable updated after successful change\", function () {",
+              "    if (pm.response.code === 200) {",
+              "        pm.environment.set(\"password\", \"NewPassword1!\");",
+              "    }",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"oldPassword\": \"{{password}}\",\n    \"newPassword\": \"NewPassword1!\",\n    \"confirmPassword\": \"NewPassword1!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users/password",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "password"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Profile Update",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Set profile data variables if not already set",
+              "if (!pm.environment.get(\"name\")) {",
+              "    pm.environment.set(\"name\", \"TestName\");",
+              "}",
+              "if (!pm.environment.get(\"lastName\")) {",
+              "    pm.environment.set(\"lastName\", \"TestLastName\");",
+              "}",
+              "if (!pm.environment.get(\"dateBirth\")) {",
+              "    pm.environment.set(\"dateBirth\", \"1990-01-15\");",
+              "}",
+              "if (!pm.environment.get(\"phone\")) {",
+              "    pm.environment.set(\"phone\", \"+380991234567\");",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// ── Dynamic body/response comparison ───────────────────────────────────────",
+              "pm.test(\"Response data matches request body - name\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var sentName = pm.environment.get(\"name\");",
+              "    pm.expect(jsonData.data.name).to.eql(sentName);",
+              "});",
+              "",
+              "pm.test(\"Response data matches request body - lastName\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var sentLastName = pm.environment.get(\"lastName\");",
+              "    pm.expect(jsonData.data.lastName).to.eql(sentLastName);",
+              "});",
+              "",
+              "pm.test(\"Response data matches request body - phone\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var sentPhone = pm.environment.get(\"phone\");",
+              "    pm.expect(jsonData.data.phone).to.eql(sentPhone);",
+              "});",
+              "",
+              "// ── dateBirth comparison without hardcoding ─────────────────────────────────",
+              "pm.test(\"Response data matches request body - dateBirth (via env variable)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var sentDateBirth = pm.environment.get(\"dateBirth\");",
+              "    // Normalize both to date-only string (YYYY-MM-DD) for comparison",
+              "    var responseDateBirth = jsonData.data.dateBirth",
+              "        ? jsonData.data.dateBirth.toString().substring(0, 10)",
+              "        : null;",
+              "    var expectedDateBirth = sentDateBirth",
+              "        ? sentDateBirth.toString().substring(0, 10)",
+              "        : null;",
+              "    pm.expect(responseDateBirth).to.eql(expectedDateBirth);",
+              "});",
+              "",
+              "pm.test(\"Response status is ok\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql(\"ok\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"{{name}}\", \"lastName\": \"{{lastName}}\", \"dateBirth\": \"{{dateBirth}}\", \"phone\": \"{{phone}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "profile"
+          ]
+        },
+        "description": "Generated from cURL: curl -X PUT \"{{baseUrl}}/api/users/profile\" -H \"Content-Type: application/json\" -d '{\"name\": \"{{name}}\", \"lastName\": \"{{lastName}}\", \"dateBirth\": \"{{dateBirth}}\", \"phone\": \"{{phone}}\"}'"
+      },
+      "response": []
+    },
+    {
+      "name": "Profile Update - Number as lastName",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 for invalid lastName type\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"Response status is error (language-agnostic)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"status\");",
+              "    pm.expect(jsonData.status).to.eql(\"error\");",
+              "});",
+              "",
+              "pm.test(\"Response has message field\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"message\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"ValidName\", \"lastName\": 12345, \"dateBirth\": \"1990-01-15\", \"phone\": \"+380991234567\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "profile"
+          ]
+        },
+        "description": "Generated from cURL: curl -X PUT \"{{baseUrl}}/api/users/profile\" -H \"Content-Type: application/json\" -d '{\"name\": \"ValidName\", \"lastName\": 12345, \"dateBirth\": \"1990-01-15\", \"phone\": \"+380991234567\"}'"
+      },
+      "response": []
+    },
+    {
+      "name": "Profile Update - Number as name",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 for invalid name type\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"Response status is error (language-agnostic)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"status\");",
+              "    pm.expect(jsonData.status).to.eql(\"error\");",
+              "});",
+              "",
+              "pm.test(\"Response has message field\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"message\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": 99999, \"lastName\": \"ValidLastName\", \"dateBirth\": \"1990-01-15\", \"phone\": \"+380991234567\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "profile"
+          ]
+        },
+        "description": "Generated from cURL: curl -X PUT \"{{baseUrl}}/api/users/profile\" -H \"Content-Type: application/json\" -d '{\"name\": 99999, \"lastName\": \"ValidLastName\", \"dateBirth\": \"1990-01-15\", \"phone\": \"+380991234567\"}'"
+      },
+      "response": []
+    },
+    {
+      "name": "Profile Update - Invalid dateBirth format",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 for invalid dateBirth format\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"Response status is error (language-agnostic)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"status\");",
+              "    pm.expect(jsonData.status).to.eql(\"error\");",
+              "});",
+              "",
+              "pm.test(\"Response has message field\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"message\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"ValidName\", \"lastName\": \"ValidLastName\", \"dateBirth\": \"not-a-date\", \"phone\": \"+380991234567\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "profile"
+          ]
+        },
+        "description": "Generated from cURL: curl -X PUT \"{{baseUrl}}/api/users/profile\" -H \"Content-Type: application/json\" -d '{\"name\": \"ValidName\", \"lastName\": \"ValidLastName\", \"dateBirth\": \"not-a-date\", \"phone\": \"+380991234567\"}'"
+      },
+      "response": []
+    },
+    {
+      "name": "Profile Update - Boolean as phone",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"ValidName\", \"lastName\": \"ValidLastName\", \"dateBirth\": \"1990-01-15\", \"phone\": true}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/users/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "profile"
+          ]
+        },
+        "description": "Generated from cURL: curl -X PUT \"{{baseUrl}}/api/users/profile\" -H \"Content-Type: application/json\" -d '{\"name\": \"ValidName\", \"lastName\": \"ValidLastName\", \"dateBirth\": \"1990-01-15\", \"phone\": true}'"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "// Переключение базового URL в зависимости от итерации Runner\r",
+          "if (pm.info.iteration === 0) {\r",
+          "    // Первая итерация — стенд qauto\r",
+          "    pm.collectionVariables.set(\"baseUrl\", \"https://fortesting.com.ua\"); \r",
+          "} else if (pm.info.iteration === 1) {\r",
+          "    // Вторая итерация — стенд qauto2\r",
+          "    pm.collectionVariables.set(\"baseUrl\", \"https://fortesting.com.ua\"); \r",
+          "}\r",
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
