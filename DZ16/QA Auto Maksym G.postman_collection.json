@@ -1,0 +1,209 @@
+{
+	"info": {
+		"_postman_id": "c1a2b3c4-d5e6-4f7g-8h9i-0j1k2l3m4n5o",
+		"name": "Book ISBN Numbers",
+		"description": "Коллекция для выполнения домашнего задания js_homework16 по SOAP/XML запросам.",
+		"schema": "https://getpostman.com"
+	},
+	"item": [
+		{
+			"name": "1. Получить информацию о книге по ISBN",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// === ТЕСТЫ НА ЗАГОЛОВКИ И СТАТУСЫ ===",
+							"pm.test(\"1. Статус-код ответа равен 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"2. Время ответа составляет менее 1000 мс\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"pm.test(\"3. В ответе присутствует заголовок Content-Type\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"",
+							"pm.test(\"4. Заголовок Content-Type равен text/xml; charset=utf-8\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/xml\");",
+							"});",
+							"",
+							"pm.test(\"5. В ответе присутствует заголовок Server\", function () {",
+							"    pm.response.to.have.header(\"Server\");",
+							"});",
+							"",
+							"// === ТЕСТЫ НА ТЕЛО ОТВЕТА (XML) ===",
+							"const xml2js = require('xml2js');",
+							"xml2js.parseString(pm.response.text(), function (err, result) {",
+							"    ",
+							"    pm.test(\"6. Успешный парсинг XML без ошибок\", function () {",
+							"        pm.expect(err).to.be.null;",
+							"    });",
+							"",
+							"    pm.test(\"7. Тело XML содержит корневой элемент Envelope и Body\", function () {",
+							"        pm.expect(result).to.have.property('$');",
+							"        pm.expect(result).to.have.property('soap:Body');",
+							"    });",
+							"",
+							"    const body = result['soap:Body'][0];",
+							"    const responseNode = body['m:BookInformationResponse'] ? body['m:BookInformationResponse'][0] : null;",
+							"    ",
+							"    pm.test(\"8. Ответ содержит элемент BookInformationResult\", function () {",
+							"        pm.expect(responseNode).to.not.be.null;",
+							"        pm.expect(responseNode).to.have.property('m:BookInformationResult');",
+							"    });",
+							"",
+							"    if (responseNode && responseNode['m:BookInformationResult']) {",
+							"        const bookData = responseNode['m:BookInformationResult'][0];",
+							"        ",
+							"        pm.test(\"9. В данных книги присутствует тег названия sBookTitle\", function () {",
+							"            pm.expect(bookData).to.have.property('m:sBookTitle');",
+							"        });",
+							"",
+							"        pm.test(\"10. В данных книги присутствует тег автора sAuthor\", function () {",
+							"            pm.expect(bookData).to.have.property('m:sAuthor');",
+							"        });",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:xsi=\"http://w3.org\" xmlns:xsd=\"http://w3.org\" xmlns:soap=\"http://xmlsoap.org\">\n  <soap:Body>\n    <BookInformation xmlns=\"http://daehosting.com\">\n      <sISBN>9780596009205</sISBN>\n    </BookInformation>\n  </soap:Body>\n</soap:Envelope>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://daehosting.com",
+					"protocol": "http",
+					"host": [
+						"webservices",
+						"daehosting",
+						"com"
+					],
+					"path": [
+						"services",
+						"isbnservice.wso"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Проверить валидность ISBN 13",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// === ТЕСТЫ НА ЗАГОЛОВКИ И СТАТУСЫ ===",
+							"pm.test(\"1. Статус-код ответа равен 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"2. В ответе присутствует заголовок Cache-Control\", function () {",
+							"    pm.response.to.have.header(\"Cache-Control\");",
+							"});",
+							"",
+							"pm.test(\"3. В ответе присутствует заголовок Date\", function () {",
+							"    pm.response.to.have.header(\"Date\");",
+							"});",
+							"",
+							"pm.test(\"4. В ответе присутствует заголовок Connection\", function () {",
+							"    pm.response.to.have.header(\"Connection\");",
+							"});",
+							"",
+							"pm.test(\"5. Заголовок Content-Length присутствует и является числом\", function () {",
+							"    pm.response.to.have.header(\"Content-Length\");",
+							"    pm.expect(parseInt(pm.response.headers.get(\"Content-Length\"))).to.be.above(0);",
+							"});",
+							"",
+							"// === ТЕСТЫ НА ТЕЛО ОТВЕТА (XML) ===",
+							"const xml2js = require('xml2js');",
+							"xml2js.parseString(pm.response.text(), function (err, result) {",
+							"    ",
+							"    pm.test(\"6. Успешный парсинг XML структуры валидации\", function () {",
+							"        pm.expect(err).to.be.null;",
+							"    });",
+							"",
+							"    pm.test(\"7. Тело XML ответа содержит корневой элемент Envelope\", function () {",
+							"        pm.expect(result).to.have.property('soap:Body');",
+							"    });",
+							"",
+							"    const body = result['soap:Body'][0];",
+							"    const responseNode = body['m:IsValidISBN13Response'] ? body['m:IsValidISBN13Response'][0] : null;",
+							"    ",
+							"    pm.test(\"8. Ответ содержит тег результата IsValidISBN13Result\", function () {",
+							"        pm.expect(responseNode).to.not.be.null;",
+							"        pm.expect(responseNode).to.have.property('m:IsValidISBN13Result');",
+							"    });",
+							"",
+							"    if (responseNode && responseNode['m:IsValidISBN13Result']) {",
+							"        const resultValue = responseNode['m:IsValidISBN13Result'][0];",
+							"        pm.test(\"9. Значение результата валидации является строкой или булевым типом\", function () {",
+							"            pm.expect(resultValue).to.be.oneOf([\"true\", \"false\"]);",
+							"        });",
+							"    }",
+							"",
+							"    pm.test(\"10. В ответе отсутствует элемент ошибки Fault\", function () {",
+							"        pm.expect(body).to.not.have.property('soap:Fault');",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:xsi=\"http://w3.org\" xmlns:xsd=\"http://w3.org\" xmlns:soap=\"http://xmlsoap.org\">\n  <soap:Body>\n    <IsValidISBN13 xmlns=\"http://daehosting.com\">\n      <sISBN>9780596009205</sISBN>\n    </IsValidISBN13>\n  </soap:Body>\n</soap:Envelope>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://daehosting.com",
+					"protocol": "http",
+					"host": [
+						"webservices",
+						"daehosting",
+						"com"
+					],
+					"path": [
+						"services",
+						"isbnservice.wso"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
